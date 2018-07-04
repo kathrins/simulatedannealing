@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 data = np.genfromtxt('./data/Borden3DMegaInfo.txt',
                      skip_header=1)
 # select data from plane with z=1
+# data columns: X,Y,Z,K
 data2d = data[data[:,2] == 1,:]
 X=data2d[0,:]
 
@@ -30,19 +31,22 @@ def create_bins(distancematrix):
     return bins
 
 # Variogram (assume isotropic)
-def variogram(dataset):
-    d,d1,d2=calc_distmatrix(dataset)
-    bins=create_bins(d)
-    variogram = np.zeros((bins.shape[0] - 1, 2))
+def calc_variogram(dataset):
+    d,d1,d2 = calc_distmatrix(dataset)
+    bins = create_bins(d)
+    vario = np.zeros((bins.shape[0] - 1, 2))
 
     for i in range(bins.shape[0]-1):
         idx = np.where(np.logical_and(d2>bins[i],d2<=bins[i+1]))
-        variogram[i,0] = (bins[i]+bins[i+1])/2
-        var=np.zeros(())
-        for j in range(idx.shape[0]):
-            var[j]=np.square(dataset[[idx[j,0]]] - dataset[[idx[j,1]]])
-            variogram[i,1] = ()
+        vario[i,0] = (bins[i]+bins[i+1])/2
+        var = np.zeros(len(idx),)
+        for j in range(len(idx)):
+            var[j] = np.square(dataset[[idx[j,0]],3] - dataset[[idx[j,1]],3])       #k value is in column 3 of dataset
+        vario[i,1] = (np.mean(var))
+    return vario
 
+f0=calc_variogram(data2d)
+print('variogram of data2d',f0.shape)
 
 
 # -------------------------------------------
@@ -62,7 +66,7 @@ alpha=0.8
 T=T0*(alpha**t)
 M=10
 m=0
-print(T)
+print('temperature',T)
 #set counter for total number of iterations to zero
 it=0
 #initial value for delta to let the loop run
