@@ -38,7 +38,7 @@ def calc_variogram(dataset):
     for i in range(bins.shape[0]-1):
         idx = np.where(np.logical_and(d2>bins[i],d2<=bins[i+1]))
         vario[i,0] = (bins[i]+bins[i+1])/2
-        if np.sum(idx) > 0:
+        if np.sum(idx) > 0: #x und y koordinate
             var = np.zeros(len(idx[0]),)
             for j in range(len(idx)):
                 var[j] = np.square(dataset[[idx[0][j]],3] - dataset[[idx[1][j]],3])       #k value is in column 3 of dataset
@@ -117,14 +117,14 @@ while it<10:
 
     delta = f-fold
     # if delta = f(j)-f(i) < 0:
-    if delta<0:
+    if delta<0: #besser/schlechter
         sol = solnew
     elif np.random.uniform(0,1)<np.exp(-delta/T):
         sol = solnew
     else:
         sol = sol
 
-    if m<M:
+    if m<M: #threshold for iteration/ neue temperatur
         m = m+1
     else:
         if abs(f)<0.0001:
@@ -136,8 +136,6 @@ while it<10:
             t = t+1
             T = T0*(alpha**t)
             #print(T)
-
-
 final_f = f
 # next iteration step
 # else:
