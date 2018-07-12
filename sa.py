@@ -47,30 +47,6 @@ def calc_variogram(dataset):
     return vario
 
 
-def calc_variogram_isotropic(dataset):
-    dist_matrix = calc_distmatrix(dataset)
-    bins = generate_bins(100000)
-
-    variogram = np.zeros((bins.shape[0] - 1, 2))
-
-    for ii in range(dataset.shape[0]):
-        z0 = dataset[ii, 2]
-        z1 = dataset[ii + 1:, 2]
-        v0 = np.square(z0 - z1)
-        dist0 = dist_matrix[ii, ii + 1:]
-
-        for jj in range(bins.shape[0] - 1):
-            idx = np.logical_and(dist0 > bins[jj], dist0 <= bins[jj + 1])
-
-            if np.sum(idx) > 0:
-                variogram[jj, 0] = variogram[jj, 0] + np.sum(v0[idx])
-                variogram[jj, 1] = variogram[jj, 1] + np.sum(idx)
-
-    print('num', variogram[:, 1])
-    variogram[:, 0] = variogram[:, 0] / variogram[:, 1] / 2.0
-
-    return (bins[1:] + bins[0:-1]) / 2.0, variogram[:, 0] / dataset[:, 2].var()
-
 def build_edf(measurements,):
     """builds an edf of a 1D np array"""
     npF1 = np.array(measurements)
@@ -94,8 +70,6 @@ randK=np.random.normal(0,1,data2d.shape[0])
 sol=data2d
 sol[:,3]=randK
 
-
-
 #annealing schedule from Deutsch and Cockerham, Table 1 Default
 # (t0, lambda, K max, K accept, S, O min)
 #sched = np.array([1,0.1,100,10,3,0.001])
@@ -114,8 +88,10 @@ it=0
 f0=calc_variogram(data2d)
 f1=calc_variogram(sol)
 print('variogram of data2d',f0)
-plt.plot(f0[:,0],f0[:,1])
-plt.scatter(f1[:,0],f1[:,1])
+plt.plot(f0[:,0],f0[:,1],label='Original data')
+plt.scatter(f1[:,0],f1[:,1],label='Random data')
+plt.title('Variogram')
+plt.legend()
 plt.show()
 f=np.mean(np.square(f0-f1))
 print('initial f',f)
@@ -136,7 +112,6 @@ while it<10:
 
     # Calculate Objective Function f(j) UPDATE
     f=np.mean(np.square(f0-calc_variogram(solnew)))
-    #varionew=varioold-(sol[r1]-)
 
     delta = f-fold
     # if delta = f(j)-f(i) < 0:
