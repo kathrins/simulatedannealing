@@ -47,6 +47,29 @@ def calc_variogram(dataset):
     return vario
 
 
+def calc_variogram_isotropic(dataset):
+    dist_matrix = calc_distmatrix(dataset)
+    bins = generate_bins(100000)
+
+    variogram = np.zeros((bins.shape[0] - 1, 2))
+
+    for ii in range(dataset.shape[0]):
+        z0 = dataset[ii, 2]
+        z1 = dataset[ii + 1:, 2]
+        v0 = np.square(z0 - z1)
+        dist0 = dist_matrix[ii, ii + 1:]
+
+        for jj in range(bins.shape[0] - 1):
+            idx = np.logical_and(dist0 > bins[jj], dist0 <= bins[jj + 1])
+
+            if np.sum(idx) > 0:
+                variogram[jj, 0] = variogram[jj, 0] + np.sum(v0[idx])
+                variogram[jj, 1] = variogram[jj, 1] + np.sum(idx)
+
+    print('num', variogram[:, 1])
+    variogram[:, 0] = variogram[:, 0] / variogram[:, 1] / 2.0
+
+    return (bins[1:] + bins[0:-1]) / 2.0, variogram[:, 0] / dataset[:, 2].var()
 
 def build_edf(measurements,):
     """builds an edf of a 1D np array"""
@@ -67,8 +90,8 @@ def build_edf(measurements,):
 # Select a stopping criterion
 
 #initial solution
-randK=np.random.normal(0,1,data2d.shape[0]) #?#
-sol=data2d[:,3]
+randK=np.random.normal(0,1,data2d.shape[0])
+sol=data2d
 sol[:,3]=randK
 
 
@@ -112,8 +135,8 @@ while it<10:
 
 
     # Calculate Objective Function f(j) UPDATE
-    #f=np.mean(np.square(f0-calc_variogram(solnew)))
-    varionew=varioold-(sol[r1]-)
+    f=np.mean(np.square(f0-calc_variogram(solnew)))
+    #varionew=varioold-(sol[r1]-)
 
     delta = f-fold
     # if delta = f(j)-f(i) < 0:
