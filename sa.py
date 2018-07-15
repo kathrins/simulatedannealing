@@ -164,11 +164,11 @@ while it<1000:
 
 #=======
 
-    vario_new=calc_variogram(solnew)
-    f=np.mean(np.square(f0-vario_new))
+    #vario_new=calc_variogram(solnew)
+    #f=np.mean(np.square(f0-vario_new))
 
     #update function
-    """
+
     vario_new=vario.copy()
     for i in range (bins.shape[0]-1):
         d_r1=d[:,r1]
@@ -180,8 +180,10 @@ while it<1000:
                 var_old[j] = np.square(sol[[idx1[0][j]],3] - sol[r1,3])
                 var_new[j] = np.square(solnew[[idx1[0][j]],3] - solnew[r1,3])
         #else: var_old=0,var_new=0
+        if np.sum(var_old)+np.sum(var_new)>0:
+            vario_new[i,1]=vario[i,1]-np.mean(var_old)+np.mean(var_new)
+        else: vario_new[i,1]=vario[i,1]
         
-        vario_new[i,1]=vario[i,1]-np.sum(var_old)+np.sum(var_new)
         
     for i in range (bins.shape[0]-1):
         d_r2=d[:,r2]
@@ -194,10 +196,12 @@ while it<1000:
                 var_new[j] = np.square(solnew[[idx1[0][j]],3] - solnew[r2,3])
                 
             #else: var_old=0,var_new=0
-        vario_new[i,1]=vario[i,1]-np.sum(var_old)+np.sum(var_new)
+        if np.sum(var_old)+np.sum(var_new)>0:
+            vario_new[i,1]=vario[i,1]-np.mean(var_old)+np.mean(var_new)
+        else: vario_new[i,1]=vario[i,1]
 
         f = np.mean(np.square(f0 - vario_new))
-        """
+
 #>>>>>>> d3d835bb6999f864c18e50bd689673ac6f6e8f4d
     delta = f-fold
     
