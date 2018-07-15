@@ -127,6 +127,7 @@ alpha=0.8
 T=T0*(alpha**t)
 M=10
 m=0
+itmax=1000
 #print('temperature',T)
 #set counter for total number of iterations to zero
 it=0
@@ -147,7 +148,7 @@ print('initial f',f)
 # START ITERATION
 # -------------------------------------------
 
-while it<1000:
+while it<itmax:
     it=it+1
     fold=f.copy()
     
@@ -183,7 +184,7 @@ while it<1000:
         if np.sum(var_old)+np.sum(var_new)>0:
             vario_new[i,1]=vario[i,1]-np.mean(var_old)+np.mean(var_new)
         else: vario_new[i,1]=vario[i,1]
-        
+
         
     for i in range (bins.shape[0]-1):
         d_r2=d[:,r2]
@@ -200,8 +201,8 @@ while it<1000:
             vario_new[i,1]=vario[i,1]-np.mean(var_old)+np.mean(var_new)
         else: vario_new[i,1]=vario[i,1]
 
-        f = np.mean(np.square(f0 - vario_new))
-
+    f = np.mean(np.square(f0 - vario_new))
+    #print(f)
 #>>>>>>> d3d835bb6999f864c18e50bd689673ac6f6e8f4d
     delta = f-fold
     
@@ -246,6 +247,7 @@ plt.show()
 # t = t+1
 # T = T(t)
 # next iteration step
+
 
 print('Total number of iterations',it)
 print('final temperature', T)
