@@ -67,7 +67,7 @@ def build_edf(measurements):
     StdF1 = asort[np.int_(ind)-1]
 
     return StdF1
-
+"""
 def update_vario (sol,solnew, d,vario,r1,r2):
     vario_new=vario.copy()
     for i in range (bins.shape[0]):
@@ -81,7 +81,7 @@ def update_vario (sol,solnew, d,vario,r1,r2):
                 var_new[j] = np.square(solnew[[idx1[0][j]],3] - solnew[[idx1[1][j]],3])
             
             vario_new[i,1]=vario[i,1]-np.sum(var_old)+np.sum(var_new)
-        
+   
     for i in range (bins.shape[0]):
         d_r2=d[:,r2]
         idx1=np.where(np.logical_and(d_r2>bins[i],d_r2<=bins[i+1]))
@@ -95,7 +95,7 @@ def update_vario (sol,solnew, d,vario,r1,r2):
     vario_new[i,1]=vario[i,1]-np.sum(var_old)+np.sum(var_new)
         
     return vario_new
-
+"""
 # -------------------------------------------
 # CHOOSE INITIAL STATE AND PARAMETERS FOR SA
 # -------------------------------------------
@@ -107,8 +107,8 @@ def update_vario (sol,solnew, d,vario,r1,r2):
 #sol=data2d
 #sol[:,3]=randK
 #=======
-x=np.linspace(np.min(X),np.max(X),99)
-y=np.linspace(np.min(Y),np.max(Y),99)
+x=np.linspace(np.min(X),np.max(X),10)
+y=np.linspace(np.min(Y),np.max(Y),10)
 xy=np.array(list(itertools.product(x,y)))
 zz=np.zeros(xy.shape[0])+z
 randK=np.random.normal(0,1,xy.shape[0])
@@ -127,7 +127,7 @@ alpha=0.8
 T=T0*(alpha**t)
 M=10
 m=0
-print('temperature',T)
+#print('temperature',T)
 #set counter for total number of iterations to zero
 it=0
 #initial value for delta to let the loop run
@@ -135,19 +135,19 @@ it=0
 # Calculate Objective Function f(i)
 f0=calc_variogram(data2d)
 vario=calc_variogram(sol)
-print('variogram of data2d',f0)
+#print('variogram of data2d',f0)
 plt.plot(f0[:,0],f0[:,1],label='Original data')
-plt.scatter(f1[:,0],f1[:,1],label='Random data')
-plt.title('Variogram')
+plt.scatter(vario[:,0],vario[:,1],label='Random data')
+plt.title('Initial Variogram')
 plt.legend()
 plt.show()
-f=np.mean(np.square(f0-f1))
+f=np.mean(np.square(f0-vario))
 print('initial f',f)
 # -------------------------------------------
 # START ITERATION
 # -------------------------------------------
 
-while it<100:
+while it<1000:
     it=it+1
     fold=f.copy()
     
@@ -158,14 +158,17 @@ while it<100:
     solnew[r1,3],solnew[r2,3] = sol[r2,3],sol[r1,3]
 
 
-    # Calculate Objective Function f(j) UPDATE
+    # Calculate Objective Function f(j)
 #<<<<<<< HEAD
-    f=np.mean(np.square(f0-calc_variogram(solnew)))
+
 
 #=======
-    #f=np.mean(np.square(f0-calc_variogram(solnew)))
-    #f=update_vario(sol,solnew, d,vario,r1,r2)
 
+    vario_new=calc_variogram(solnew)
+    f=np.mean(np.square(f0-vario_new))
+
+    #update function
+    """
     vario_new=vario.copy()
     for i in range (bins.shape[0]-1):
         d_r1=d[:,r1]
@@ -193,7 +196,8 @@ while it<100:
             #else: var_old=0,var_new=0
         vario_new[i,1]=vario[i,1]-np.sum(var_old)+np.sum(var_new)
 
-    f=np.mean(np.square(vario_new-vario))
+        f = np.mean(np.square(f0 - vario_new))
+        """
 #>>>>>>> d3d835bb6999f864c18e50bd689673ac6f6e8f4d
     delta = f-fold
     
@@ -204,9 +208,9 @@ while it<100:
     elif np.random.uniform(0,1)<np.exp(-delta/T):
         sol = solnew.copy()
         vario=vario_new.copy()
-    else:
-        sol = sol
-        vario=vario
+    #else:
+        #sol = sol
+        #vario=vario
 
     if m<M: #threshold for iteration/ neue temperatur
         m = m+1
@@ -221,8 +225,10 @@ while it<100:
             T = T0*(alpha**t)
             #print(T)
 final_f = f
-plt.plot(f0[:,0],f0[:,1])
-plt.scatter(vario[:,0],vario[:,1])
+plt.plot(f0[:,0],f0[:,1],label='Original data')
+plt.scatter(vario[:,0],vario[:,1],label='Fitted variogram')
+plt.title('Final Variogram')
+plt.legend()
 plt.show()
 #generate a normal field for calculation of gamma
 # always from one point (new/swapped)
@@ -238,6 +244,6 @@ plt.show()
 # next iteration step
 
 print('Total number of iterations',it)
-
+print('final temperature', T)
 print('final objective funcion',final_f)
 
