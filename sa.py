@@ -4,6 +4,7 @@ import scipy.spatial.distance as ssp
 import matplotlib.pyplot as plt
 import itertools
 
+
 # SIMULATED ANNEALING
 
 
@@ -67,6 +68,13 @@ def build_edf(measurements):
     StdF1 = asort[np.int_(ind)-1]
 
     return StdF1
+
+K_edf = build_edf(data2d[:, 3])
+F_K=sst.norm.ppf(K_edf)
+print('F_K,edf',F_K.shape)
+data2d[:,3]=F_K
+
+
 """
 def update_vario (sol,solnew, d,vario,r1,r2):
     vario_new=vario.copy()
@@ -102,11 +110,11 @@ def update_vario (sol,solnew, d,vario,r1,r2):
 # Select a stopping criterion
 
 #initial solution
-#<<<<<<< HEAD
+
 #randK=np.random.normal(0,1,data2d.shape[0])
 #sol=data2d
 #sol[:,3]=randK
-#=======
+
 x=np.linspace(np.min(X),np.max(X),10)
 y=np.linspace(np.min(Y),np.max(Y),10)
 xy=np.array(list(itertools.product(x,y)))
@@ -116,26 +124,32 @@ sol = np.concatenate((xy,zz.reshape(zz.shape[0],1),randK.reshape(randK.shape[0],
 
 d,d1,d2 = calc_distmatrix(sol)
 bins = create_bins(d)
-#>>>>>>> d3d835bb6999f864c18e50bd689673ac6f6e8f4d
+print(bins.shape)
 
 #annealing schedule from Deutsch and Cockerham, Table 1 Default
 # (t0, lambda, K max, K accept, S, O min)
 #sched = np.array([1,0.1,100,10,3,0.001])
 T0=1
 t=0
-alpha=0.8
+alpha=0.9
 T=T0*(alpha**t)
 M=10
 m=0
 itmax=1000
+T_save=[]
 #print('temperature',T)
 #set counter for total number of iterations to zero
 it=0
-#initial value for delta to let the loop run
-#delta=10
+
 # Calculate Objective Function f(i)
-f0=calc_variogram(data2d)
-vario=calc_variogram(sol)
+#f0 = calc_variogram(data2d)                  #variogram of real data
+centers = (bins[1:] + bins[0:-1])/2
+sill = 1
+ra = 1
+gauss=sill*(1-np.exp(-(centers/ra)**2)) #gaussian variogram model
+f0=np.array([centers,gauss]).T
+
+vario = calc_variogram(sol)
 #print('variogram of data2d',f0)
 plt.plot(f0[:,0],f0[:,1],label='Original data')
 plt.scatter(vario[:,0],vario[:,1],label='Random data')
@@ -143,6 +157,8 @@ plt.title('Initial Variogram')
 plt.legend()
 plt.show()
 f=np.mean(np.square(f0-vario))
+F_save=[f]
+
 print('initial f',f)
 # -------------------------------------------
 # START ITERATION
@@ -150,6 +166,7 @@ print('initial f',f)
 
 while it<itmax:
     it=it+1
+    T_save=np.append(T_save,T)
     fold=f.copy()
     
     # Generate a new solution by swapping locations of two values
@@ -160,11 +177,6 @@ while it<itmax:
 
 
     # Calculate Objective Function f(j)
-#<<<<<<< HEAD
-
-
-#=======
-
     #vario_new=calc_variogram(solnew)
     #f=np.mean(np.square(f0-vario_new))
 
@@ -202,8 +214,9 @@ while it<itmax:
         else: vario_new[i,1]=vario[i,1]
 
     f = np.mean(np.square(f0 - vario_new))
+    F_save=np.append(F_save,f)
     #print(f)
-#>>>>>>> d3d835bb6999f864c18e50bd689673ac6f6e8f4d
+
     delta = f-fold
     
     # if delta = f(j)-f(i) < 0:
@@ -248,7 +261,18 @@ plt.show()
 # T = T(t)
 # next iteration step
 
+plt.subplot(1,2,1)
+plt.title('temperature progression')
+plt.plot(np.arange(itmax),T_save)
+plt.ylabel('iterations')
+plt.xlabel('T')
 
+plt.subplot(1,2,2)
+plt.plot(np.arange(itmax+1),F_save)
+plt.xlabel('objective function f')
+plt.ylabel('iterations')
+plt.title('objective function ')
+plt.show()
 print('Total number of iterations',it)
 print('final temperature', T)
 print('final objective funcion',final_f)
