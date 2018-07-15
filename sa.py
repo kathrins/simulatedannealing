@@ -67,6 +67,13 @@ def build_edf(measurements):
     StdF1 = asort[np.int_(ind)-1]
 
     return StdF1
+
+K_edf = build_edf(data2d[:, 3])
+F_K=sst.norm.ppf(K_edf)
+print('F_K,edf',F_K)
+
+
+
 """
 def update_vario (sol,solnew, d,vario,r1,r2):
     vario_new=vario.copy()
