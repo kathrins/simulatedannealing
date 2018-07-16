@@ -145,8 +145,8 @@ it=0
 #f0 = calc_variogram(data2d)                  #variogram of real data
 centers = (bins[1:] + bins[0:-1])/2
 sill = 1
-ra = 1
-gauss=sill*(1-np.exp(-(centers/ra)**2)) #gaussian variogram model
+ra = 10
+gauss=sill*(1-np.exp(-(np.square(centers)/ra**2))) #gaussian variogram model
 f0=np.array([centers,gauss]).T
 
 vario = calc_variogram(sol)
