@@ -96,7 +96,7 @@ def update_vario (sol,solnew, d,vario,r1,r2):
 
 
 def do_annealing():
-    data = np.genfromtxt('./Borden3DMegaInfo.txt',
+    data = np.genfromtxt('./data/Borden3DMegaInfo.txt',
                      skip_header=1)
     # select data from plane with z=1
     # data columns: X,Y,Z,K

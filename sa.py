@@ -114,9 +114,10 @@ def update_vario (sol,solnew, d,vario,r1,r2):
 #randK=np.random.normal(0,1,data2d.shape[0])
 #sol=data2d
 #sol[:,3]=randK
-
-x=np.linspace(np.min(X),np.max(X),10)
-y=np.linspace(np.min(Y),np.max(Y),10)
+nx=50
+ny=50
+x=np.linspace(0,nx,nx+1)
+y=np.linspace(0,ny,ny+1)
 xy=np.array(list(itertools.product(x,y)))
 zz=np.zeros(xy.shape[0])+z
 randK=np.random.normal(0,1,xy.shape[0])
@@ -146,8 +147,10 @@ it=0
 centers = (bins[1:] + bins[0:-1])/2
 sill = 1
 ra = 10
-gauss=sill*(1-np.exp(-(np.square(centers)/ra**2))) #gaussian variogram model
-f0=np.array([centers,gauss]).T
+gauss=sill*(1-np.exp(-np.square(centers)/ra**2)) #gaussian variogram model
+f0 = np.zeros((centers.shape[0], 2))
+f0[:, 0] = centers
+f0[:, 1] = gauss
 
 vario = calc_variogram(sol)
 #print('variogram of data2d',f0)
@@ -158,7 +161,7 @@ plt.legend()
 plt.show()
 f=np.mean(np.square(f0-vario))
 F_save=[f]
-
+plt.plot(f0[:,0],f0[:,1],label='Original data')
 print('initial f',f)
 # -------------------------------------------
 # START ITERATION
@@ -230,6 +233,9 @@ while it<itmax:
         #sol = sol
         #vario=vario
 
+    if it%(itmax/10)==0:  #plot progress of variogramm 10 times in the iteration process
+        lab=str(it)
+        plt.plot(vario[:, 0], vario[:, 1],label=lab)
     if m<M: #threshold for iteration/ neue temperatur
         m = m+1
     else:
@@ -242,6 +248,10 @@ while it<itmax:
             t = t+1
             T = T0*(alpha**t)
             #print(T)
+plt.title('progression of variogram')
+plt.legend(ncol=5)
+plt.show()
+
 final_f = f
 plt.plot(f0[:,0],f0[:,1],label='Original data')
 plt.scatter(vario[:,0],vario[:,1],label='Fitted variogram')
