@@ -101,8 +101,9 @@ alpha=0.9
 T=T0*(alpha**t)
 M=10
 m=0
-itmax=1000
+itmax=5000
 T_save=[]
+delta_save=[]
 
 #set counter for total number of iterations to zero
 it=0
@@ -126,7 +127,7 @@ plt.legend()
 plt.show()
 f=np.mean(np.square(f0-vario))
 F_save=[f]
-plt.plot(f0[:,0],f0[:,1],label='Original data')
+#plt.plot(f0[:,0],f0[:,1],label='Original data')
 print('initial f',f)
 # -------------------------------------------
 # START ITERATION
@@ -178,6 +179,7 @@ while it<itmax:
     F_save=np.append(F_save,f)
 
     delta = f-fold
+    delta_save=np.append(delta_save,delta)
 
     if delta<0:
         sol = solnew.copy()
@@ -187,13 +189,13 @@ while it<itmax:
         vario=vario_new.copy()
 
 
-    if it%(itmax/10)==0:  #plot progress of variogramm 10 times in the iteration process
-        lab=str(it)
-        plt.plot(vario[:, 0], vario[:, 1],label=lab)
+    #if it%(itmax/10)==0:  #plot progress of variogramm 10 times in the iteration process
+        #lab=str(it)
+        #plt.plot(vario[:, 0], vario[:, 1],label=lab)
     if m<M:
         m = m+1
     else:
-        if abs(f)<0.0001:
+        if abs(f)<1e-3:
             break
         elif T==0:
             break
@@ -202,42 +204,33 @@ while it<itmax:
             t = t+1
             T = T0*(alpha**t)
 
-plt.title('progression of variogram')
-plt.legend(bbox_to_anchor=(1,1),loc=2)
-plt.show()
+#plt.title('progression of variogram')
+#plt.legend(bbox_to_anchor=(1,1),loc=2)
+#plt.show()
 
-final_f = f
+print('last delta value',delta)
+print('Total number of iterations',it)
+print('final temperature', T)
+print('final objective funcion',f)
+
 plt.plot(f0[:,0],f0[:,1],label='Original data')
 plt.scatter(vario[:,0],vario[:,1],label='Fitted variogram')
 plt.title('Final Variogram')
 plt.legend()
 plt.show()
-#generate a normal field for calculation of gamma
-# always from one point (new/swapped)
 
-# next iteration step
-# else:
-# if stopping criterion == True:
-# take current solution i
-# else:
-# m=0
-# t = t+1
-# T = T(t)
-# next iteration step
 
 plt.subplot(1,2,1)
 plt.title('temperature progression')
-plt.plot(np.arange(itmax),T_save)
-plt.ylabel('iterations')
-plt.xlabel('T')
+plt.plot(np.arange(it),T_save)
+plt.ylabel('T')
+plt.xlabel('iterations')
 
 plt.subplot(1,2,2)
-plt.plot(np.arange(itmax+1),F_save)
-plt.xlabel('objective function f')
-plt.ylabel('iterations')
+plt.plot(np.arange(it+1),F_save)
+plt.xlabel('iterations')
+plt.ylabel('mean square error')
 plt.title('objective function ')
+
 plt.show()
-print('Total number of iterations',it)
-print('final temperature', T)
-print('final objective funcion',final_f)
 
