@@ -81,8 +81,8 @@ data2d[:,3]=F_K
 
 #initial solution
 
-nx=50
-ny=50
+nx=10
+ny=10
 x=np.linspace(0,nx,nx+1)
 y=np.linspace(0,ny,ny+1)
 xy=np.array(list(itertools.product(x,y)))
@@ -90,9 +90,16 @@ zz=np.zeros(xy.shape[0])+z
 randK=np.random.normal(0,1,xy.shape[0])
 sol = np.concatenate((xy,zz.reshape(zz.shape[0],1),randK.reshape(randK.shape[0],1)),axis=1)
 
+n_plot=1
+plt.subplot(1,4,n_plot)
+sol_grid=np.reshape(sol[:,3],(nx+1,ny+1))
+plt.title('initial')
+plt.imshow(sol_grid)
+
+
 d,d1,d2 = calc_distmatrix(sol)
 bins = create_bins(d)
-print(bins.shape)
+#print(bins.shape)
 
 # annealing schedule
 T0=1
@@ -190,9 +197,15 @@ while it<itmax:
 
 
     #if it%(itmax/5)==0:  #plot progress of variogramm 5 times in the iteration process
-    if (it==1 or it==100 or it==1000 or it==5000):
-        lab=str(it)
-        plt.plot(vario[:, 0], vario[:, 1],label=lab)
+    if (it==1 or it==100 or it==1000 ):   # in certain iteration steps the field is plotted
+        #lab=str(it)
+        #plt.plot(vario[:, 0], vario[:, 1],label=lab)
+        n_plot = n_plot+1
+        plt.subplot(1, 4, n_plot)
+        sol_grid = np.reshape(sol[:, 3], (nx + 1, ny + 1))
+        plt.title(it)
+        plt.imshow(sol_grid)
+
     if m<M:
         m = m+1
     else:
@@ -204,12 +217,14 @@ while it<itmax:
             m = 0
             t = t+1
             T = T0*(alpha**t)
-
+plt.colorbar()
+plt.show()
+"""
 plt.plot(f0[:, 0], f0[:, 1], label='Original data')
 plt.title('progression of variogram')
 plt.legend(bbox_to_anchor=(1,1),loc=2)
 plt.show()
-
+"""
 print('last delta value',delta)
 print('Total number of iterations',it)
 print('final temperature', T)
